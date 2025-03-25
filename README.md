@@ -244,7 +244,7 @@ for file in *.tsv; do awk 'NR > 1 {print FILENAME "\t" $0}' "$file" >> pointfind
 ```bash
 nohup bash -c ' for i in *.fasta; do prodigal -i ${i} -a prodigal/${i%.fasta}.faa -o gff/${i%.fasta}.gff -d nucleotide/${i%.fasta}.fa -f gff; done' > prodigal.log &
 ```
-##  eggnog基因注释，需要运行蛋白质文件，运行emapper，18m，默认diamond 1e-3; 2M,32p,1.5h, 该步骤耗时较长
+##  eggnog基因注释，需要运行蛋白质文件
 ```bash
 mkdir eggnog
 nohup bash -c 'for i in *.faa; do emapper.py --data_dir /home/student/metagenome/eggnog -i ${i} --cpu 8 -m diamond --override -o eggnog/${i%.faa}; done' > eggnog.log &
