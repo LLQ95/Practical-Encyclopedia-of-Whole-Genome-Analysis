@@ -5,9 +5,11 @@
 
 ```bash
 nohup bash -c 'for i in $(ls *.fq.gz | cut -d'_' -f1); do spades.py --isolate -1 ${i}_1.fq.gz -2 ${i}_2.fq.gz -o ./spade/${i} -t 8 -m 300 -k 21,33,55,77; done' > spade.log &
-```bash
+```
 ##  宏基因组组装指令
+```bash
 nohup bash -c 'for i in $(ls *.clean.fq.gz | cut -d'_' -f1); do spades.py --meta -1 ${i}_1.clean.fq.gz -2 ${i}_2.clean.fq.gz -o ./spade/${i} -t 8 -m 600 -k 59,79,99,109,125 --careful; done' > spade.log & 
+```
 ## spade拼接## 
 conda activate checkm
 ## 为文件夹下的双端测序的原始文件进行批量拼接，注意修改文件后缀
