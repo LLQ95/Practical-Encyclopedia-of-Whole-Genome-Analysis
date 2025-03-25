@@ -385,41 +385,21 @@ java -Xmx16G -jar ~/software/pilon-1.23.jar --genome ./contigs.fa --fix all --ch
 sistr -i contigs.fasta contigs.fasta -f csv -o /output/rusults -p CGMLST_PROFILES -n NOVEL_ALLELES
 cat *.csv >> ./totalsero.csv
 ``` 
-# 14.	比较有用的R代码
-vim Scale_zero_length_branches.R
-args <- commandArgs(trailingOnly = TRUE)
-# 输入文件路径
-input_file <- args[1] 
-# 输出文件路径
-output_file <- paste0(tools::file_path_sans_ext(input_file), "_collapsed.nwk") 
-##  Scale the branch length to a minimum value of 0.0001
-library(ape)
-tree <- read.tree(input_file)
-##  判断  tree 中是否有 0 枝长 存在, 若有零枝长，即缩放至最小枝长为0.0001
-condition_str <- '0' %in% tree$edge.length 
-if ( condition_str == TRUE ) {
-  tree <- compute.brlen(tree, minlength = 0.0001)
-}
-##  collapsing zero length branches
-#library(phytools)
-#tree <- read.newick(input_file)
-#tree <- di2multi.simmap(tree, tol = 0.0001 ) 
-#tree <- di2multi(tree, tol = 0.0001 ) 
-# 将折叠后的树保存为Newick文件
-write.tree(tree, file = output_file)
-Rscript Scale_zero_length_branches.R core_SNP_tree.tre
-
-15.	分子钟
+# 15.	分子钟
 ##  Estimation of time scaled phylogenies (核心语句，用于筛选离群值)
-treetime --tree 441_core_SNP_tree.tre --dates 441_date.csv --aln 441_clean.core.aln --outdir salmonella --coalescent skyline
-## 方案二，使用全长aln或者全长进行建树，利用全长去做treetime
-
+```bash
+treetime --tree 441_core_SNP_tree.tre --dates 441_date.csv --aln clean.core.aln --outdir salmonella --coalescent skyline
+``` 
 其他输出文件包括与重建祖先序列的比对、带注释的 nexus 格式树，其中分支长度对应于年份和突变，并且节点日期（采用上面详述的数字格式）作为注释添加到每个节点。此外，绘制从根到尖与时间的回归和树并保存到文件中。
 ##  Ancestral sequence reconstruction （祖先序列重建）
-treetime ancestral --aln 441_clean.core.aln --tree 441_core_SNP_tree.tre --outdir ancestral_results
-
-treetime homoplasy --aln 441_clean.core.aln --tree 441_core_SNP_tree.tre
+```bash
+treetime ancestral --aln lean.core.aln --tree core_SNP_tree.tre --outdir ancestral_results
+```
+```bash
+treetime homoplasy --aln clean.core.aln --tree core_SNP_tree.tre
+```
 重建祖先序列并将突变映射到树中。输出由一个包含祖先序列的文件“ancestral.fasta”和一个树“annotated_tree.nexus”组成，其中添加了突变作为注释，例如 A45G、G136T、…，SNP 中的数字默认使用基于 1 的索引。推断出的 GTR 模型写入标准输出。
+```bash
 treetime ancestral [-h] --aln ALN [--vcf-reference VCF_REFERENCE]
                    [--tree TREE] [--rng-seed RNG_SEED] [--gtr GTR]
                    [--gtr-params GTR_PARAMS [GTR_PARAMS ...]] [--aa]
@@ -428,10 +408,13 @@ treetime ancestral [-h] --aln ALN [--vcf-reference VCF_REFERENCE]
                    [--report-ambiguous]
                    [--method-anc {parsimony,fitch,probabilistic,ml}]
                    [--verbose VERBOSE] [--outdir OUTDIR]
+```                  
 ##  Estimation of evolutionary rates and tree rerooting
-treetime clock --tree 441_core_SNP_tree.tre --dates 441_date.csv --outdir clock_results --aln 441_clean.core.aln
- --sequence-len 1400 
+```bash
+treetime clock --tree core_SNP_tree.tre --dates date.csv --outdir clock_results --aln clean.core.aln
+```   
 计算从根到尖的回归并量化树的“时钟似然性”。除非使用 –keep-root 运行，否则它将重新根植树以最大化时钟似信号并重新计算分支长度
+```bash
 treetime clock [-h] --tree TREE [--rng-seed RNG_SEED] [--dates DATES]
                [--name-column NAME_COLUMN] [--date-column DATE_COLUMN]
                [--sequence-length SEQUENCE_LENGTH] [--aln ALN]
@@ -440,26 +423,29 @@ treetime clock [-h] --tree TREE [--rng-seed RNG_SEED] [--dates DATES]
                [--reroot REROOT [REROOT ...] | --keep-root]
                [--tip-slack TIP_SLACK] [--covariation] [--allow-negative-rate]
                [--plot-rtt PLOT_RTT] [--verbose VERBOSE] [--outdir OUTDIR]
-
+```  
 ##  Inference of transition between discrete characters and ‘mugration’ models
+```bash
 treetime mugration --tree *.nwk --states *.csv --attribute country
+```  
 离散字符与“迁移”模型之间的转换推断
 此命令将生成带注释的 nexus 树，其中属性的状态作为注释添加到每个节点（例如[&country="brazil"]）。此外，推断出的不同状态之间的 GTR 模型被写入文件。
 
 ##  Analyzing homoplasies and recurrent mutations
+```bash
 treetime homoplasy --aln 441_clean.core.aln --tree 441_core_SNP_tree.tre
+```  
 ## 同源性
 重建祖先序列并将突变映射到树上。然后扫描树以查找同源性。过多的同源性可能表明存在污染、重组、文化适应或类似情况。
-
+```bash
 treetime homoplasy [-h] --aln ALN [--vcf-reference VCF_REFERENCE]
                    [--tree TREE] [--rng-seed RNG_SEED] [--const CONST]
                    [--rescale RESCALE] [--detailed] [--gtr GTR]
                    [--gtr-params GTR_PARAMS [GTR_PARAMS ...]] [--aa]
                    [--custom-gtr CUSTOM_GTR] [--zero-based] [-n N]
                    [--drms DRMS] [--verbose VERBOSE] [--outdir OUTDIR]
-##  arg
+```  
 计算从根到尖的回归并量化树的“时钟似性”。除非使用 –keep_root 运行，否则它将重新根植树以最大化时钟似信号并重新计算分支长度。
-
 分子钟分析总流程
 核苷酸/氨基酸序列数据(ClustalW, Muscle, MAFFT)
 多序列比对对齐
@@ -515,216 +501,3 @@ MCC tree with discrete traits
 运行完成后生成new.html文件即可正常显示
 生成BF值传播图
 依次上传location.rates.log,（用宿主或地区分log文件，不用总的log文件）经纬度文件，地图.json文件
-
-
-
-
-
-
-##  翻译核酸为对应蛋白序列, --trim去除结尾的*
-mkdir protein_seq
-nohup bash -c ' for i in *.fasta; do seqkit translate --trim ${i} -j 8 > ./protein_seq/${i}; done' > translate.log &
-##  格式化结果并显示表头
-grep -v '^## ' *.emapper.annotations | sed '1 s/^#//' > output
-csvtk -t headers -v output
-summarizeAbundance.py -i ../../salmon/gene.TPM -m output --dropkeycolumn -c '7,12,19' -s '*+,+,' -n raw -o eggnog
-sed -i 's#^ko:## ' eggnog.KEGG_ko.raw.txt
-sed -i '/^-/d' eggnog*
-head -n3 eggnog*
-## 添加注释生成STAMP的spf格式
-cd /home/student/lilanqi/aquaproduct/spade/prodigal/nucleotide/translate/eggnog
-awk 'BEGIN{FS=OFS="\t"} NR==FNR{a[$1]=$2} NR>FNR{print a[$1],$0}' /home/student/metagenome/EasyMicrobiome/kegg/KO_description.txt eggnog.KEGG_ko.raw.txt | sed 's/^\t/Unannotated\t/' > eggnog.KEGG_ko.TPM.spf
-head -n 5 eggnog.KEGG_ko.TPM.spf
-## KO to level 1/2/3
-summarizeAbundance.py -i eggnog.KEGG_ko.raw.txt -m /home/student/metagenome/EasyMicrobiome/kegg/KO1-4.txt -c 2,3,4 -s ',+,+,' -n raw --dropkeycolumn -o KEGG
-head -n3 KEGG*
-## 
-## 多个文件寻找相同的序列
-seqkit common [flags]
-# By ID (default,>后面，空格之前的名字)输出ID名字相同的
-seqkit common test1.fa test2.fa -o common.fasta
-# By full name（整个序列的名字，包含description部分）。输出序列名字相同的。
-seqkit common test1.fa test2.fa -n -o common.fasta
-# 输出要比较的文件中序列相同的序列
-seqkit common test1.fa test2.fa -s -i -o common.fasta
-# 输出要比较的文件中序列相同的序列 (for large sequences)
-seqkit common *.fasta -s -i -o common.fasta --md5
-https://bioinf.shenwei.me/seqkit/
-## ## 
-## 使用samtools，bcftools，bedtools，seqkit提取上下游基因片段
-samtools faidx *.fasta
-最后生成的.fai文件如下， 共5列，\t分隔；
-one 66 5 30 31
-two 28 98 14 15
-第一列 NAME   :   序列的名称，只保留“>”后，第一个空白之前的内容；
-第二列 LENGTH:   序列的长度， 单位为bp；
-第三列 OFFSET :   第一个碱基的偏移量， 从0开始计数，换行符也统计进行；
-第四列 LINEBASES : 除了最后一行外， 其他代表序列的行的碱基数， 单位为bp；
-第五列 LINEWIDTH : 行宽， 除了最后一行外， 其他代表序列的行的长度， 包括换行符， 在windows系统中换行符为\r\n, 要在序列长度的基础上加2；
-## #提取gff文件的所有基因位置,并转换成bed格式
-## #将标准注释gff3文件转换得到bed格式的gff文件
-## #方法1  #调用的bedops，也可以自己
-awk '{if($3~/^gene$/)print}' EVM.gff3 > genes.gff && convert2bed  --input=gff --output=bed  < gene.gff >genes.bed #调用的bedops，也可以自己用awk
-awk '{if($3~/^gene$/)print}' EVM.gff3 > genes.gff && gff2bed <genes.gff> genes.bed #结果同上
-## #方法2
-less EVM.final.gene.gff3 |grep -w gene|awk '{print$1"\t"$4-1"\t"$5"\t"$9"\t"".""\t"$7}'  >genes.gff
-2.2 计算染色体长度
-samtools faidx *.fasta
-cut -f 1,2 final.genome.fasta.fai >final.genome.fasta.len
-2.3 创建包含promoter位置的bed文件,up or down位置
-## 注意事项
-## slop-根据已有特征区间向外延展，可分别指定上下游延伸长度；
-## flank-根据现有区间，指定侧翼延伸长度，得到两侧翼位置的新区间，不包含现有区间；
-## 一般默认启动子区域应该是上下游2kb，最大不超过5kb。
-#up or down 
-# 提取基因上游3k 区间
-bedtools flank -i genes.bed -g final.genome.fasta.len  -l 3000 -r 0 -s > up_3k.promoters.bed
-# 提取基因下游2k的区间
-bedtools flank -i genes.bed -g final.genome.fasta.len  -l 0 -r 2000 -s > down_2k.promoters.bed
-# 提取基因上游3k，下游2k区间
-bedtools flank -i genes.bed -g final.genome.fasta.len  -l 3000 -r 2000 -s > up_down.promoters.bed
-#提取up+gene+down区间
-bedtools slop  -i genes.bed -g final.genome.fasta.len  -l 3000 -r 2000 -s > up_3k.promoters.slop.bed
-## ##  参数说明
-# -l 基因起始位置前多少bp
-# -r 基因后多少bp
-# -s 考虑正负链
-2.4 根据bed中的位置信息，在基因组序列中提取指定序列
-#分上下游提取：结果1示例cmd
-bedtools getfasta -s -fi final.genome.fasta -bed up_3k.promoters.bed -fo up_3k.promoters.fa -name
-bedtools getfasta -s -fi final.genome.fasta -bed down_2k.promoters.bed -fo down_2k.promoters.fa -name
-#上下游一起提取，fa文件中id会一致：结果2示例cmd
-bedtools getfasta -s -fi final.genome.fasta -bed up_down_2k.promoters.bed -fo down_2k.promoters.fa -name
-#提取上游+gene+下游，重点：结果3示例cmd
-bedtools getfasta -s -fi final.genome.fasta -bed up_3k.promoters.slop.bed -fo J493.up_genes_down.fa -name
-
-#提取gene序列，不考虑延长基因坐标左右的边位置。
-bedtools getfasta -s -fi ../01.data/03.Assembly_final/final.genome.fasta -bed genes.bed -fo genes.fa -name
-## #参数说明：
--name 显示名字，即bed的第四列的名字。不写则显示坐标的范围
--s strand #考虑正负链条
--fi 基因组fa文件
--bed 准备好的bed格式文件
--fo 输出文件名 
-export PATH=/share/nas1/pengzw/software/bedops-v2.4.38/bin/:$PATH
-#step0:数据准备
-gff=Chr_genome_final_gene.gff3
-genome=Lachesis_assembly_changed.fa
-fai=Lachesis_assembly_changed.fa.fai
-#step1:将标准注释gff3文件转换得到bed格式的gff文件
-convert2bed  --input=gff --output=bed  <$gff>all.bed && awk '{if($8~/^gene$/)print}' all.bed  >genes.bed
-#awk '{if($3~/^gene$/)print}' $gff > genes.gff && gff2bed <genes.gff> genes.bed #结果同上
-#step2准备基因组长度文件
-#samtools faidx $genome >fai
-cut -f 1,2 $fai >genome.len
-len=genome.len
-#step3:getfasta
-#flank 分别提取上游，下游序列，因为写在仪器，id会一样，无法区分上下游
-l=2000
-r=2000
-bedtools flank  -i genes.bed -g $len -l $l -r 0 -s > up.flank.bed
-bedtools getfasta -s -fi $genome -bed up.flank.bed -fo up.gene.flank.promoter.fa -name 
-bedtools flank  -i genes.bed -g $len -l 0 -r $r -s > down.flank.bed
-bedtools getfasta -s -fi $genome -bed down.flank.bed -fo down.gene.flank.promoter.fa -name 
-#slop 上下游延伸提取
-l=2000
-r=2000
-bedtools slop  -i genes.bed -g $len -l $l -r $r -s > slop.bed
-bedtools getfasta -s -fi $genome -bed slop.bed -fo all.gene.slop.promoter.fa -name
-提取序列：
-samtools faidx input.fa chr1 > chr1.fa
-samtools faidx input.fa chr1:100-200 > chr1.fa
-##  输出A和B有交集的区域
-bedtools intersect -a cpg.bed -b exons.bed  > a_int_b.txt
-##  在有重叠区域，输出文件A中的原始特征
-bedtools intersect -a cpg.bed -b exons.bed  -wa |head
-##  在有重叠区域，输出文件A和文件B的原始特征
-bedtools intersect -a cpg.bed -b exons.bed  -wa -wb |head
-##  对文件A中的每个特征输出与文件B的重叠，如果没有重叠，则为B输出为NULL
-bedtools intersect -a cpg.bed -b exons.bed -loj |head
-##  输出文件A和B的特征以及它们之间的碱基对重叠数量
-bedtools intersect -a cpg.bed -b exons.bed -wao |head
-##  只输出文件A中重叠一次的特征
-bedtools intersect -a cpg.bed -b exons.bed -u |head
-##  对文件A中的每个条目，输出与文件B重叠的次数
-bedtools intersect -a cpg.bed -b exons.bed -c |head
-##  只输出文件A中不与文件B重叠的特征
-bedtools intersect -a cpg.bed -b exons.bed -v |head
-##  A文件与一个或多个B文件取交集
-bedtools intersect -a exons.bed -b cpg.bed gwas.bed hesc.chromHmm.bed -sorted | head
-##  用标签标识，"A"文件（例如外显子）与多个"B"文件（例如CpG岛、GWAS SNPs和ChromHMM注释）相交时，每个交集来自哪个"B"文件
-bedtools intersect -a exons.bed -b cpg.bed gwas.bed hesc.chromHmm.bed -sorted -wa -wb -names cpg gwas chromhmm |head -n 10000 |tail
-##  对bed文件排序
-sort -k1,1 -k2,2n foo.bed > foo.sort.bed
-##  合并重叠区间
-bedtools merge -i exons.bed |head
-##  合并重叠区间，同时输出合并成新区间的原始区间数量
-bedtools merge -i exons.bed -c 1 -o count|head
--c #参数用于指定输入文件中你想要总结的列，
--o #参数定义了你希望应用到`-c`参数列上的操作
-##  合并那些虽然不重叠但彼此接近的区间。例如，如果你想合并所有相距不超过1000个碱基对（bp）的特征区间，你可以使用 `-d 1000` 参数
-bedtools merge -i exons.bed -d 1000 -c 1 -o count|head
-##  合并后，同时列出合并后区间包含的每个特征（例如外显子）的名称
-bedtools merge -i exons.bed -d 90  -c 1,4  -o count,collapse|head
-bedtools genomecov -i ./demo_date/exons.bed -g ./demo_date/genome.txt |head
--d #生成的输出详细列出了每个位置的覆盖次数
--bg #输出BEDGRAPH格式，它合并连续的具有相同覆盖深度的区域
--bga #参数提供了类似于BEDGRAPH的输出，但是对于未覆盖的区域也会显示出来，覆盖次数为0
--d -split #参数考虑了剪接对覆盖度的影响，剪接或分裂的读段被计算在内
--bga -split #纳入剪接读段的考虑，并输出EDGRAPH格式，同样会显示未覆盖区域
-如果没有bed文件，使用gff，vcf文件也可以
-bedtools intersect -a file1.bed -b file2.bed > output.bed
-vcftools --vcf input.vcf --freq --out output
-samtools sort -o output.bam input.bam
-plotHeatmap -m matrix.gz -out output.pdf
-nohup bash -c 'for i in $(ls *.fq.gz | cut -d'_' -f1); do spades.py --isolate -1 ${i}_R1.fq.gz -2 ${i}_R2.fq.gz -o ./spade/${i} -t 8 -m 300 -k 21,33,55,77; done' > spade.log &
-conda activate SNP
-nohup bash -c 'for i in *.fasta; do transposon_classifier_RFSB -mode classify -fastaFile ${i} -outputPredictionFile transposon/${i%.fasta}.txt; done' > transposon.log &
-transposon_classifier_RFSB -mode evaluate -predLabelFile demoFiles/demo2_predLabel.txt -trueLabelFile demoFiles/demo2_trueLabel.txt -outputPickleFile True
-transposon_classifier_RFSB -mode trainModel -fastaFile demoFiles/demo3_transposonDB.fasta -labelFile demoFiles/demo3_labels.txt -outputModelFile demoFiles/demo3_model.pickle -eThreshold 5.0
-#MLST typing
-#Using software MLST (https://github.com/peterk87/sistr_cmd/)
-mlst --csv contigs.fasta > /output/rusults.csv
-#AMR analysis
-#ARG and plasmid replicon analysis
-#Using software ABRicate (https://github.com/tseemann/abricate)
-abricate --db resfinder --quiet contigs.fasta
-abricate --db plasmidfinder --quiet contigs.fasta
-#Point mutation analysis
-#Using software AMRFinder (https://github.com/ncbi/amr)
-amrfinder -n contigs.fasta --plus -O Salmonella
-#Sequence alignment
-#Using software Clinker (https://github.com/gamcil/clinker)
-clinker files/*.gbk -p plot.html
-#Phylogenetic analysis
-#Using software snippy (https://github.com/tseemann/snippy)
-#Using software gubbins (https://github.com/nickjcroucher/gubbins#generating-input-files)
-#Using software RAxML (https://github.com/stamatak/standard-RAxML)
-snippy --cpus 64 --outdir ./outdir/contigs.fa-SNP --ref ./SO4698-09.fna --ctgs contigs.fa
-snippy-core --ref ./SO4698-09.fna *-SNP
-snp-sites -b -c -o phylo.aln core.full.aln
-snippy-clean_full_aln core.full.aln > clean.full.aln
-run_gubbins.py --threads 64 -p gubbins clean.full.aln
-raxmlHPC -f a -x 12345 -# 1000 -p 12345 -m GTRGAMMA -s core.aln -n ex -T 64
-library(rhierbaps)
-snp.matrix <- load_fasta(fasta.file.name)
-hb.results <- hierBAPS(snp.matrix, max.depth = 2, n.pops = 20, quiet = TRUE)
-#Genome annotation
-#Using software Prokka (https://github.com/tseemann/prokka)
-prokka --kingdom Bacteria --outdir mydir --prefix mygenome contigs.fa
-#Pan genome and GWAS analysis
-#Using software Roary (https://github.com/tseemann/prokka)
-#Using software Scoary (https://github.com/tseemann/prokka)
-roary -e --mafft -p 64 *.gff
-scoary -g scaex -t example.csv -o mydir -s 11 -c BH -p 0.05
-emapper.py --cpu 64 --data_dir /ref/eggNOG/ --tax_scope bacteria -i /protein.fasta --output_dir mydir
-#Phylogeography analysis
-#Transitions between states are estimated under the asymmetric model of Bayesian Stochastic Search Variable Selection -BSSVS. 
-#Using software Beast (https://beast.community/index.html)
-software/BEASTv1.10.4/bin/beast -threads 64 align.xml
-software/BEASTv1.10.4/bin/logcombiner -burnin 10000000 -trees align-1.trees.txt align-2.trees.txt align-3.trees.txt aligncombinetree.txt
-software/BEASTv1.10.4/bin/logcombiner -burnin 10000000 align-1.log.txt align-2.log.txt align-3.log.txt aligncombinelog.txt
-software/BEASTv1.10.4/bin/treeannotator -limit 90 -heights mean aligncombinelog.txt output.txt
-library(TipDatingBeast)
-RandomDates(name="align", reps=20, writeTrees=F)
-PlotDRT(name="align", reps=20, burnin=0.1)
