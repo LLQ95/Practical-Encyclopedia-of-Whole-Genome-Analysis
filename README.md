@@ -92,14 +92,18 @@ vim prokka.sh
 按i进入插入模式
 按esc 输入:wq并回车，保存并退出文本编辑模式
 ### 查看文件是否写入
-cat prokka.sh 
+```bash
+cat prokka.sh
+```
 ### 直接运行批处理命令
-bash prokka.sh 
-#程序放服务器的后台运行
+```bash
+bash prokka.sh
+```
+### 程序放服务器的后台运行
 nohup bash prokka.sh > prokka.log & 
-#查看正在运行的工作，查看后台有无程序运行## 
+### 查看正在运行的工作，查看后台有无程序运行
 jobs
-#强制停止任务运行
+### 强制停止任务运行
 kill -9 %1
 ## 使用rgi对耐药基因进行注释，使用card数据库
 nohup bash -c 'for i in *.fasta; do rgi main -a DIAMOND --input_sequence ${i} --local --clean -o card/${i%.fasta}; done' >> card.log &
