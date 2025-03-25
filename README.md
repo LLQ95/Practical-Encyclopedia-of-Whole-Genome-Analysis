@@ -194,11 +194,8 @@ for file in SeqSero_result*/SeqSero_result.tsv; do awk 'NR==2' "$file" >> merged
 ## cgmlst_salmonella分析，cgMLSTschema99 用于做grapetree ## 
 ```bash
 chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/salmonella/Salmonella_enterica_INNUENDO_cgMLST -o ./AlleleCall --cpu 8 --mode 1
-
 chewBBACA.py ExtractCgMLST -i ./AlleleCall/results_alleles.tsv -o  ./ExtractCgMLST
-
 chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g /home/student/anaconda3/envs/chewie/db/salmonella/Salmonella_enterica_INNUENDO_cgMLST -o ./AlleleCallEvaluator --cpu 8
-
 chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCall --cpu 8 --mode 1
 chewBBACA.py ExtractCgMLST -i ./AlleleCall/results_alleles.tsv -o  ./ExtractCgMLST
 chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g /home/student/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCallEvaluator --cpu 8
@@ -274,43 +271,55 @@ nohup bash -c 'for i in *.gff; do antismash ${i} --output-dir antismash --asf --
 ```
 ## slurm系列操作指令
 ## 查看当前运行情况，一般不用top来查看
+```bash
 squeue
+```
 ## 删除当前账户下所有运行的指令
+```bash
 scancel -u student
+```
 ## 作业提交指令
+```bash
 sbatch *.slurm
+```
 ## 其他生信代码补充
+```bash
 nohup bash -c 'mlst *.fasta > ./pubmlst.tab' &
+```
 ## 压缩，解压指令
 ## 压缩
+```bash
 tar -czvf sichuan_salmon.tar.gz *.fasta
+```
 ## 解压tar.gz文件
+```bash
 for i in *.tar.gz; do tar -zxvf ${i}; done
 tar -zxvf *.tar.gz
+```
 ## 解压gz文件
+```bash
 gunzip *.gz
+```
 ##  参考资料
 https://www.ncbi.nlm.nih.gov/pathogens/docs/datasets_assemblies/
 # 12.	Download genomes from NCBI database
-## 从https://www.ncbi.nlm.nih.gov/pathogens/ 下载accession号以及对应的信息表
-##  datasets version: 16.43.0
-## 依据NCBI给的accession号进行下载
-##  The NCBI Datasets command-line tools (CLI) （默认指令，一般弃用，遇到卡顿会退出）
+从https://www.ncbi.nlm.nih.gov/pathogens/ 下载accession号以及对应的信息表
+依据NCBI给的accession号进行下载
+he NCBI Datasets command-line tools (CLI) （默认指令，一般弃用，遇到卡顿会退出）
+```bash
 nohup bash -c 'datasets download genome accession --inputfile enteritidis_accessions.txt --api-key 1ef429d37c5d6103dac9cdaec0f54728d009' > ncbi.log &
-## 下载速度虽然慢，但是比较稳定## 
-## 编写批处理文件，避免出现单条命令出现报错会直接闪退的现象## 
-
-
-## 下载后的文件立即检查ST型，剔除离群值，做一下质控，并进一步进行去重的工作
-##  Simply just give it a genome file in FASTA/GenBank/EMBL format, optionally compressed with gzip, zip or bzip2. 无需解压直接运行
-## 从NCBI数据库上下载fasta文件
+``` 
+从NCBI数据库上下载fasta文件
+```bash
 unzip *.zip
 for i in *.zip; do unzip ${i}; done
+``` 
 ## 保留文件的前15个字符（accession ID）
-
+```bash
 for file in *.fna; do mv "$file" "${file:0:15}.fna"; done
-
+``` 
 ##  Perl语言版本批量改名
+```bash
 rename 's/\.all.fna/\.fasta/' *
 rename 's/\.fna/\.fasta/' *
 rename 's/GCA/GCA_/' *
@@ -320,51 +329,63 @@ rename 's/21L/21L-/' *
 rename 's/S21./S21_/' *
 rename 's/.seq/.fasta/' *
 rename 's/.gff/-T.gff/' *
+``` 
 ##  rename (util-linux 2.23.2) C语言版本
-#目录中有file1.txt、file2.txt、file3.txt文件，要将所有文件名中的"file"替换为"doc"。
+```bash
 rename -v 'file' 'doc' *.txt
 rename -v 'md5' 'MD5' *.txt
-
-#整理并获取biosample唯一的序列号，整合到download.txt下
-conda activate ncbi_datasets
-nohup bash -c 'iseq -i download.txt -p 8 -g -d sra' > download.log &（不建议会卡命令，跑循环）
+``` 
+##  整理并获取biosample唯一的序列号，整合到download.txt下
+```bash
+nohup bash -c 'iseq -i download.txt -p 8 -g -d sra' > download.log &
 nohup bash -c 'cat download.txt | while read Run; do iseq -i $Run -a -g; done' > download.log &
+``` 
 ## conda 指令增加下载渠道
+```bash
 conda config --add channels conda-forge
 conda config --add channels bioconda
 conda config --show channels
-## 单独运行某个py的方法，将py程序复制粘贴到对应环境的bin中
-## 以checkm为例
-## 再添加权限后即可顺利运行
+``` 
+单独运行某个py的方法，将py程序复制粘贴到对应环境的bin中,再添加权限后即可顺利运行
+```bash
 chmod +x /data/liushiwei/anaconda3/envs/checkm/bin/dereplicator.py
 chmod +x /data/liushiwei/anaconda3/envs/env_roary/bin/roary_plots.py
-## ## #
-基本指令，比如rename，git 需要在base环境下运行
+``` 
 ## 在服务器上使用ollama进行deepseek本地化运行
+```bash
 ollama run DeepSeek-R1-Distill-Qwen-32B-GGUF:latest
 ollama list
-## ## #
-13.	三代分析
-#Genome assembly 三代nanopore数据分析
-#Using software spades (http://cab.spbu.ru/software/spades/)
-#Using software Unicycler (https://github.com/rrwick/Unicycler)
-#Using software Flye (https://github.com/fenderglass/Flye)
-#Using software Pilon (https://github.com/broadinstitute/pilon/)
+``` 
+# 13.	三代分析
+Genome assembly 三代nanopore数据分析
+## Using software spades 
+(http://cab.spbu.ru/software/spades/)
+## Using software Unicycler 
+(https://github.com/rrwick/Unicycler)
+## Using software Flye 
+(https://github.com/fenderglass/Flye)
+## Using software Pilon 
+(https://github.com/broadinstitute/pilon/)
+```bash
 spades.py -k 21,33,55,77,99,127 --careful --pe1-1 short_reads_1.fastq.gz --pe1-2 short_reads_2.fastq.gz -o /output/dir/ --phred-offset 33
 unicycler -1 short_reads_1.fastq.gz -2 short_reads_2.fastq.gz -l long_reads.fastq.gz -o /output/dir/
 canu -p output -d out_dir -fast genomeSize=5m -nanopore-raw reads.fastq.gz
 flye -o out_dir --genome-size 5m --threads 16 --nano-raw reads.fastq.gz
+``` 
 ## 三代数据分析
+```bash
 bwa index ./contigs.fa
 bwa mem -t 12 ./contigs.fa ./short_reads_1.fastq.gz short_reads_2.fastq.gz | samtools view - -Sb | samtools sort - -@14 -o ./mapping.sorted.bam
 samtools index mapping.sorted.bam
 java -Xmx16G -jar ~/software/pilon-1.23.jar --genome ./contigs.fa --fix all --changes --frags mapping.sorted.bam --threads 12 --output ./pilon/pilon_round1 | tee ./pilon/round1.pilon
-#Serotyping
-#Using software SISTR (https://github.com/peterk87/sistr_cmd/)
+``` 
+## Serotyping Using software SISTR 
+(https://github.com/peterk87/sistr_cmd/)
+```bash
 sistr -i contigs.fasta contigs.fasta -f csv -o /output/rusults -p CGMLST_PROFILES -n NOVEL_ALLELES
 cat *.csv >> ./totalsero.csv
-
-14.	比较有用的R代码
+``` 
+# 14.	比较有用的R代码
 vim Scale_zero_length_branches.R
 args <- commandArgs(trailingOnly = TRUE)
 # 输入文件路径
@@ -429,6 +450,7 @@ treetime mugration --tree *.nwk --states *.csv --attribute country
 treetime homoplasy --aln 441_clean.core.aln --tree 441_core_SNP_tree.tre
 ## 同源性
 重建祖先序列并将突变映射到树上。然后扫描树以查找同源性。过多的同源性可能表明存在污染、重组、文化适应或类似情况。
+
 treetime homoplasy [-h] --aln ALN [--vcf-reference VCF_REFERENCE]
                    [--tree TREE] [--rng-seed RNG_SEED] [--const CONST]
                    [--rescale RESCALE] [--detailed] [--gtr GTR]
