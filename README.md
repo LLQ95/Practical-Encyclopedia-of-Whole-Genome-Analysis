@@ -2,7 +2,6 @@
 全基因组whole genome sequencing
 
 ## 1.	组装与评估
-
 ```bash
 nohup bash -c 'for i in $(ls *.fq.gz | cut -d'_' -f1); do spades.py --isolate -1 ${i}_1.fq.gz -2 ${i}_2.fq.gz -o ./spade/${i} -t 8 -m 300 -k 21,33,55,77; done' > spade.log &
 ```
@@ -10,21 +9,26 @@ nohup bash -c 'for i in $(ls *.fq.gz | cut -d'_' -f1); do spades.py --isolate -1
 ```bash
 nohup bash -c 'for i in $(ls *.clean.fq.gz | cut -d'_' -f1); do spades.py --meta -1 ${i}_1.clean.fq.gz -2 ${i}_2.clean.fq.gz -o ./spade/${i} -t 8 -m 600 -k 59,79,99,109,125 --careful; done' > spade.log & 
 ```
-## spade拼接## 
-conda activate checkm
 ## 为文件夹下的双端测序的原始文件进行批量拼接，注意修改文件后缀
+```bash
 nohup bash -c 'ls | while read LINE; do spades.py -1 $LINE/$LINE\_1.fq.gz -2 $LINE/$LINE\_2.fq.gz -o ./spades/$LINE; done' > spades.log &
-## 
+```
 ## 在上级文件夹下为下级文件夹下的contigs.fasta进行批量改名，并统一转移到上级文件夹下
+```bash
 ls | while read LINE;do cp $LINE/contigs.fasta ./$LINE.fasta;done
+```
 ## quast评估组装的质量
+```bash
 quast.py *.fasta -o quast_output
+```
 ## checkm评估组装的质量
 ## 安装
 #mamba create -n checkM python numpy matplotlib pysam hmmer prodigal pplacer checkm-#genome
 ## 运行
 conda activate checkM
+```bash
 nohup bash -c 'checkm lineage_wf -f ./checkmresult.tsv --tab_table -x fasta -t 8 --pplacer_threads 8 ./ .' > checkm.log &
+```
 ## 阈值为5%，污染率超过5%的菌株应当舍弃
 2.	基因注释
 ## 自建数据库查找噬菌体，接合质粒
