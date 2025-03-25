@@ -22,21 +22,14 @@ ls | while read LINE;do cp $LINE/contigs.fasta ./$LINE.fasta;done
 quast.py *.fasta -o quast_output
 ```
 ## checkm评估组装的质量
-## 安装
-#mamba create -n checkM python numpy matplotlib pysam hmmer prodigal pplacer checkm-#genome
-## 运行
-conda activate checkM
 ```bash
 nohup bash -c 'checkm lineage_wf -f ./checkmresult.tsv --tab_table -x fasta -t 8 --pplacer_threads 8 ./ .' > checkm.log &
 ```
-## 阈值为5%，污染率超过5%的菌株应当舍弃
-2.	基因注释
-## 自建数据库查找噬菌体，接合质粒
-## 对fasta文件可以直接运行以下命令，建议编写在同一个sh文件下统一运行
-conda activate checkm
+阈值为5%，污染率超过5%的菌株应当舍弃
+## 2.	基因注释
+对fasta文件可以直接运行以下命令，建议编写在同一个sh文件下统一运行
+```bash
 mlst *.fasta --threads 8 > ./pubmlst.tab
-## mlst --scheme cronobacter *.fasta > ./mlst.tab
-## mlst --minid 90 --scheme senterica_achtman_2 *.fasta > ./mlst.tab
 abricate --threads 8 --db plasmidfinder *.fasta > ./plasmidfinder.tab
 abricate --threads 8 --db BacMet2_EXP_database *.fasta > ./BacMet.tab
 abricate --threads 8 --db card *.fasta > ./card.tab
@@ -54,28 +47,23 @@ abricate --threads 8 --db Tn *.fasta > ./Tn.tab
 abricate --threads 8 --db mobileOG *.fasta > ./mobileOG.tab
 abricate --threads 8 --db SGI-1 *.fasta > ./SGI-1.tab
 seqkit stats -a *.fasta -j 8 -T > genome_stats.tsv
-## 
-## Listeria 专属数据库
-abricate --threads 8 --db lis_vir *.fasta > ./lis_vir.tab
-abricate --threads 8 --db lis_stress_island > ./lis_stress_island.tab
-abricate --threads 8 --db lm_resistance > ./lm_resistance.tab
-abricate --threads 8 --db listeria_Metal_Disinfectants_Resistance > ./lm_MDR.tab
-abricate --threads 8 --db listeria_antibiotic_resistance > ./lm_AMR.tab
-## 
-nohup bash mlst.sh > mlst.log & 
-## Transposon database: https://tncentral.ncc.unesp.br/
-## Prophage database: https://phastest.ca/databases
-## IS database: https://www-is.biotoul.fr/
-nohup bash -c ' abricate --threads 8 --db Tn *.fasta > ./Tn.tab' > Tn.log &
+```
+## Transposon database
+https://tncentral.ncc.unesp.br/
+## Prophage database
+https://phastest.ca/databases
+## IS database
+https://www-is.biotoul.fr/
 ## 更新pubmlst数据库
+```bash
 nohup bash -c 'mlst-download_pub_mlst -j 8 -d /home/student/anaconda3/envs/checkm/db/pubmlst' > download_pubmlst.log &
-## iceberg 数据库介绍: Integrative and conjugative element (ICE) is bacterial mobile genetic elements (MGEs), which is integrative to the bacterial chromosome and encodes a fully functioning conjugation machinery and is thus self-transmissible between bacterial cells, chromosome-borne integrative and mobilizable elements (IMEs), cis-mobilizable elements (CIMEs), plasmids. T4SSO(Ontology of Type IV Secretion Systems) is aimed at the systematic and logic representation of Type IV Secretion Systems.
-## 主流数据库统计## 
+```
+## 主流数据库统计
 #ncbi 7010条数据，card 4805条，resfinder 3192条，MEGARes（耐药加消毒剂）6635条，#vfdb 4392条，消毒剂重金属753条，插入序列5970条，转座子加插入序列6073条
-## 使用prokka进行批量注释## 
-## 直接使用nohup一句话写完
+## 使用prokka进行批量注释 
+```bash
 nohup bash -c 'for i in *.fasta; do prokka --outdir ./prokka/${i%.fasta} --cpus 8 --prefix ${i%.fasta} ${i} --addgenes --addgenes --centre X --compliant;done' > prokka.log &
-## 
+```
 ## abricate 自建数据库
 awk '/^>/{split($0,a,">"); print "> Tn~~~" a[2] "~~~" a[2] "~~~" a[2]} !/^>/{print}' Tn.fa > modified_Tn.fasta
 awk '/^>/{split($0,a,">"); print "> mobileOG~~~" a[2] "~~~" a[2] "~~~" a[2]} !/^>/{print}' mobileOG.fasta > modified_mobileOG.fasta
