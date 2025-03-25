@@ -52,8 +52,6 @@ https://www-is.biotoul.fr/
 ```bash
 nohup bash -c 'mlst-download_pub_mlst -j 8 -d /home/student/anaconda3/envs/checkm/db/pubmlst' > download_pubmlst.log &
 ```
-## 主流数据库统计
-#ncbi 7010条数据，card 4805条，resfinder 3192条，MEGARes（耐药加消毒剂）6635条，#vfdb 4392条，消毒剂重金属753条，插入序列5970条，转座子加插入序列6073条
 ## 使用prokka进行批量注释 
 ```bash
 nohup bash -c 'for i in *.fasta; do prokka --outdir ./prokka/${i%.fasta} --cpus 8 --prefix ${i%.fasta} ${i} --addgenes --addgenes --centre X --compliant;done' > prokka.log &
