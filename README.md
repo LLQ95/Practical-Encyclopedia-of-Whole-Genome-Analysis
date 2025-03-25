@@ -94,130 +94,142 @@ cat prokka.sh
 bash prokka.sh
 ```
 ### 程序放服务器的后台运行
-nohup bash prokka.sh > prokka.log & 
+```bash
+nohup bash prokka.sh > prokka.log &
+```
 ### 查看正在运行的工作，查看后台有无程序运行
+```bash
 jobs
+```
 ### 强制停止任务运行
+```bash
 kill -9 %1
+```
 ## 使用rgi对耐药基因进行注释，使用card数据库
-nohup bash -c 'for i in *.fasta; do rgi main -a DIAMOND --input_sequence ${i} --local --clean -o card/${i%.fasta}; done' >> card.log &
-## 批量生成gff3文件
+```bash
+nohup bash -c 'for i in *.fasta; do rgi main -a DIAMOND --input_sequence ${i} --local --clean -o card/${i%.fasta}; done' >> card.log &## 批量生成gff3文件
+```
+```bash
 nohup bash -c 'for i in *.fasta; do dante -q ${i} -o gff3/${i%.fasta}.gff3 -c 8; done' > dante.log &
+```
 ## 使用bakta进行文件注释（运行较慢，注释效果优于prokka和prodigal）
-conda activate bakta_env
-bakta_db list
-#bakta_db download --output /home/student/metagenome/bakta --type full
-#bakta_db download --output /data/liushiwei/bakta_db --type full
+```bash
 nohup bash -c 'for i in *.fasta; do bakta --db /home/student/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
 nohup bash -c 'for i in *.fasta; do bakta --db /home/student/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
 nohup bash -c 'for i in *.fasta; do bakta --db /data/liushiwei/bakta_db/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
 amrfinder_update --force_update --database /data/liushiwei/bakta_db/db/amrfinderplus-db
 conda install -y -c conda-forge -c bioconda --strict-channel-priority ncbi-amrfinderplus=4.0.19
+```
 （需要指定版本号，否则无法正常安装）
 bakta 支持宏基因组注释，添加--meta参数
 ## 使用amrfinder注释耐药基因
-conda activate bakta_env
-mamba update ncbi-amrfinderplus
+```bash
 amrfinder -u -d /home/student/metagenome/bakta/db/amrfinderplus-db
 amrfinder -n *.fasta -o amrfinder.tab --mutation_all --threads 8
 amrfinder -g *.gff
-amrfinder -v
-
-3.	质粒
-#从gff文件里直接截取一段contigs，作为fasta文件，将对应的fasta文件用gbk或者gff文件注释，最后再在easyfig或者是clinker上面进行可视化分析
-这样做可视化分析会得心应手
+```
+# 3.	质粒
+从gff文件里直接截取一段contigs，作为fasta文件，将对应的fasta文件用gbk或者gff文件注释，最后再在easyfig或者是clinker上面进行可视化分析
 ## 使用genomad数据库预测可移动元件
+```bash
 genomad end-to-end --cleanup --splits 8 GCF_009025895.1.fna.gz genomad_output /data/liushiwei/genomad_db
 nohup bash -c 'for i in *.fasta; do genomad end-to-end --cleanup --splits 8 ${i} genomad_output /data/liushiwei/genomad_db; done' > genomad.log &
 nohup bash -c 'for i in *.fasta; do genomad end-to-end --cleanup --splits 8 ${i} genomad_output /home/student/genomad_db/genomad_db; done' > genomad.log &
-
+```
 ## MGEfinder
+```bash
 for i in *.fasta; do mefinder find -t 8 --contig ./${i} ./mefinder/${i%.fasta}; done
-## #质粒染色体分离
-conda activate plasflow
+```
+## 质粒染色体分离
+```bash
 for i in *.fasta; do PlasFlow.py --input ${i} --output ./plasflow/${i%.fasta} --threshold 0.7; done
-conda activate mob_suite
+```
+```bash
 for i in *.fasta; do mob_recon -i ${i} -o ./mob_suite/${i%.fasta}; done
-## 使用mobile_OG对可移动元件的类型进行预测
-
-
-## 
-4.	泛基因组
-conda activate env_roary
+```
+# 4.	泛基因组
+```bash
 nohup bash -c 'roary -e --mafft -p 64 -g 10000000 -r *.gff' > roary.log &
 python3 roary_plots.py core_SNP_tree.tre gene_presence_absence.csv
+```
 ## coinfinder
 参考资料：https://zhuanlan.zhihu.com/p/620558098
+```bash
 coinfinder -i gene_presence_absence.csv -I -p core_SNP_tree.tre -o coinfinder -x 8 -a -d -m
 nohup bash -c 'query_pan_genome -a intersection *.gff' > pan_genome.log &
-scoary -g gene_presence_absence.csv -t traits.csv -n 472_core_SNP_tree_collapsed.nwk
+scoary -g gene_presence_absence.csv -t traits.csv -n core_SNP_tree_collapsed.nwk
+```
 ## 示例
+```bash
 scoary -t Tetracycline_resistance.csv -g Gene_presence_absence.csv -u -c I EPW
 panaroo -i *.gff -o results --clean-mode strict --remove-invalid-genes
-## panaroo与roary本身并不兼容，需要单独去建立panaroo的环境
+```
+panaroo与roary本身并不兼容，需要单独去建立panaroo的环境
 ## 泛基因组背景资料介绍
 http://sanger-pathogens.github.io/Roary/
-## 
-5.	建树、SNP比较
-conda activate SNP
+
+# 5.	建树、SNP比较
+```bash
 snippy-clean_full_aln core_gene_alignment.aln > clean.full.aln
-run_gubbins.py -c 32 -p gubbins clean.full.aln
+run_gubbins.py -c 8 -p gubbins clean.full.aln
 snp-sites -c gubbins.filtered_polymorphic_sites.fasta > clean.core.aln
 FastTree -gtr -nt clean.core.aln > core_SNP_tree.tre
 psdm -l -t 8 -o psdm_snp_clean.tab -P -d "\t" clean.core.aln
 snp-dists -j 8 clean.core.aln > snp.tab
-## 
-#输出文件core_SNP_tree.tre为核心基因组的树文件
-##  标准建树方法
-run_gubbins.py -c 32 -p gubbins clean.full.aln
-## 指定建树方法加快建树的进程
-run_gubbins.py -c 64 --prefix enteritidis --tree-builder iqtree --first-model JC --tree-builder raxmlng --model GTR clean.full.aln
+```
+输出文件core_SNP_tree.tre为核心基因组的树文件,snp.tab 为两两比较的snp文件
+## 指定建树方法
+run_gubbins.py -c 8 --prefix enteritidis --tree-builder iqtree --first-model JC --tree-builder raxmlng --model GTR clean.full.aln
 ## 利用gubbins进行祖先重建
-run_gubbins.py -c 24 --best-model --recon-with-dates --date 441_date_1.csv -p enteritidis clean.full.aln
+run_gubbins.py -c 8 --best-model --recon-with-dates --date 441_date_1.csv -p enteritidis clean.full.aln
 
-#snp.tab 为两两比较的snp文件
-## 
-6.	血清型鉴定以及cgmlst分型
-#沙门血清型鉴定
-conda activate seqsero
+# 6.	血清型鉴定以及cgmlst分型
+```bash
 nohup bash -c 'for i in *.fasta; do SeqSero2_package.py -m k -t 4 -i ${i} -p 8; done' > seqsero.log &
-## 
-#批量提取生成文件中的沙门的血清型信息
+```
+批量提取生成文件中的沙门的血清型信息
+```bash
 for file in SeqSero_result*/SeqSero_result.tsv; do awk 'NR==2' "$file" >> merged_second_lines.txt; done
+```
 ## cgmlst_salmonella分析，cgMLSTschema99 用于做grapetree ## 
-conda activate chewie
+```bash
 chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/salmonella/Salmonella_enterica_INNUENDO_cgMLST -o ./AlleleCall --cpu 8 --mode 1
 
 chewBBACA.py ExtractCgMLST -i ./AlleleCall/results_alleles.tsv -o  ./ExtractCgMLST
 
 chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g /home/student/anaconda3/envs/chewie/db/salmonella/Salmonella_enterica_INNUENDO_cgMLST -o ./AlleleCallEvaluator --cpu 8
-## 
+
 chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCall --cpu 8 --mode 1
 chewBBACA.py ExtractCgMLST -i ./AlleleCall/results_alleles.tsv -o  ./ExtractCgMLST
 chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g /home/student/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCallEvaluator --cpu 8
+```
 ##  利用已知数据库文件进行cgmlst建库
+```bash
 chewBBACA.py PrepExternalSchema -g /home/student/anaconda3/envs/chewie/db/cronobacter_alleles -o /home/student/anaconda3/envs/chewie/db/crono --cpu 18
-##  cgmlst_
+```
+##  cgmlst
+```bash
 chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/crono  -o ../filtration_AlleleCall1 --cpu 8 --mode 1
 chewBBACA.py ExtractCgMLST -i ../filtration_AlleleCall1/results_alleles.tsv -o  ../ExtractCgMLST
 chewBBACA.py AlleleCallEvaluator -i ../filtration_AlleleCall1 -g /home/student/anaconda3/envs/chewie/db/crono  -o ../AlleleCallEvaluator --cpu 8
-## 
 chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/crono/crono  -o ../filtration_AlleleCall1 --cpu 18 --mode 1
 chewBBACA.py ExtractCgMLST -i ../filtration_AlleleCall1/results_alleles.tsv -o  ../ExtractCgMLST
+```
 ## Linux 隐藏文件/文件夹
 在文件名前+.即可将文件/文件夹隐藏，需要对文件进行重命名才能够重新显示出来
 ##  计算GC含量
+```bash
 seqkit fx2tab -l -g -n -i -H *.fasta -j 8 > gc.tab
-7.	去重、去冗余
-## 使用dereplicator去除重复的样本
-## （需要提前安装mash）速度和效率远远高于cd-hit
-tr -d '\r' < file2.txt | xargs -I {} mv -- "{}" /data/liushiwei/salmonella/Global_Chicken_enteritidis/ST11
-## dereplicator 的distance不应过大，否则大量的序列都会被删除
-## 4000株筛选至165株，阈值建议设定为0.0001以下，阈值尽量设置小一点
+```
+# 7.	去重、去冗余
+使用dereplicator去除重复的样本（需要提前安装mash）
+```bash
 nohup bash -c 'dereplicator.py ./ dereplicator_0.0001 --distance 0.0001 --thread 32' > dereplicator_0.0001.log &
+```
 ## 使用cd-hit去冗余样本
-conda activate SNP
+```bash
 nohup bash -c 'for i in *.fasta; do cd-hit -i ${i} -o cd-hit/${i} -aS 0.9 -c 0.95 -G 0 -g 0 -T 0 -M 0; done' > cd-hit.log &
+```
 8.	点突变
 ## pointfinder点突变
 conda activate checkm
