@@ -38,14 +38,8 @@ abricate --threads 8 --db vfdb *.fasta > ./vfdb.tab
 abricate --threads 8 --db resfinder *.fasta > ./resfinder.tab
 abricate --threads 8 --db ISfinder *.fasta > ./ISfinder.tab
 abricate --threads 8 --db SPI *.fasta > ./SPI.tab
-abricate --threads 8 --db ICE *.fasta > ./ICE.tab
-abricate --threads 8 --db ice *.fasta > ./ice.tab
-abricate --threads 8 --db oriT *.fasta > ./oriT.tab
-abricate --threads 8 --db relaxase_t4cp *.fasta > ./relaxase_t4cp.tab
-abricate --threads 8 --db prophage *.fasta > ./prophage.tab
 abricate --threads 8 --db Tn *.fasta > ./Tn.tab
 abricate --threads 8 --db mobileOG *.fasta > ./mobileOG.tab
-abricate --threads 8 --db SGI-1 *.fasta > ./SGI-1.tab
 seqkit stats -a *.fasta -j 8 -T > genome_stats.tsv
 ```
 ## Transposon database
