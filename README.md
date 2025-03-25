@@ -3,7 +3,9 @@
 ## 从测序公司拿到的clean_data无需再做剪切，直接用于拼接即可
 1.	组装与评估
 ## 全基因组组装指令
-nohup bash -c 'for i in $(ls *.fq.gz | cut -d'_' -f1); do spades.py --isolate -1 ${i}_1.fq.gz -2 ${i}_2.fq.gz -o ./spade/${i} -t 8 -m 300 -k 21,33,55,77; done' > spade.log & 
+```bash
+nohup bash -c 'for i in $(ls *.fq.gz | cut -d'_' -f1); do spades.py --isolate -1 ${i}_1.fq.gz -2 ${i}_2.fq.gz -o ./spade/${i} -t 8 -m 300 -k 21,33,55,77; done' > spade.log &
+```bash
 ##  宏基因组组装指令
 nohup bash -c 'for i in $(ls *.clean.fq.gz | cut -d'_' -f1); do spades.py --meta -1 ${i}_1.clean.fq.gz -2 ${i}_2.clean.fq.gz -o ./spade/${i} -t 8 -m 600 -k 59,79,99,109,125 --careful; done' > spade.log & 
 ## spade拼接## 
