@@ -65,17 +65,36 @@ nohup bash -c 'mlst-download_pub_mlst -j 8 -d /home/student/anaconda3/envs/check
 nohup bash -c 'for i in *.fasta; do prokka --outdir ./prokka/${i%.fasta} --cpus 8 --prefix ${i%.fasta} ${i} --addgenes --addgenes --centre X --compliant;done' > prokka.log &
 ```
 ## abricate 自建数据库
+案例一
+```bash
 awk '/^>/{split($0,a,">"); print "> Tn~~~" a[2] "~~~" a[2] "~~~" a[2]} !/^>/{print}' Tn.fa > modified_Tn.fasta
+```
+案例二
+```bash
 awk '/^>/{split($0,a,">"); print "> mobileOG~~~" a[2] "~~~" a[2] "~~~" a[2]} !/^>/{print}' mobileOG.fasta > modified_mobileOG.fasta
-head -n 1 sequences
+```
+核心建库语句
+```bash
 abricate --setupdb --threads 16
+```
+查看abricate数据库
+```bash
 abricate –list
+```
+强制更新abricate自带的数据库
+```bash
 abricate-get_db --db megares --force
-vim prokka.sh   ## 编写prokka批处理文件
-#按i进入插入模式
-#按esc 输入:wq并回车，保存并退出文本编辑模式
-cat prokka.sh # 查看文件是否写入
-bash prokka.sh ## 直接运行批处理命令
+```
+## 使用vim编写批处理文件
+```bash
+vim prokka.sh  
+```
+按i进入插入模式
+按esc 输入:wq并回车，保存并退出文本编辑模式
+### 查看文件是否写入
+cat prokka.sh 
+### 直接运行批处理命令
+bash prokka.sh 
 #程序放服务器的后台运行
 nohup bash prokka.sh > prokka.log & 
 #查看正在运行的工作，查看后台有无程序运行## 
