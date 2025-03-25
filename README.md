@@ -385,7 +385,7 @@ java -Xmx16G -jar ~/software/pilon-1.23.jar --genome ./contigs.fa --fix all --ch
 sistr -i contigs.fasta contigs.fasta -f csv -o /output/rusults -p CGMLST_PROFILES -n NOVEL_ALLELES
 cat *.csv >> ./totalsero.csv
 ``` 
-# 15.	分子钟
+# 14.	分子钟
 ##  Estimation of time scaled phylogenies (核心语句，用于筛选离群值)
 ```bash
 treetime --tree 441_core_SNP_tree.tre --dates 441_date.csv --aln clean.core.aln --outdir salmonella --coalescent skyline
