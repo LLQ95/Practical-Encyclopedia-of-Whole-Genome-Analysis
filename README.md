@@ -230,42 +230,48 @@ nohup bash -c 'dereplicator.py ./ dereplicator_0.0001 --distance 0.0001 --thread
 ```bash
 nohup bash -c 'for i in *.fasta; do cd-hit -i ${i} -o cd-hit/${i} -aS 0.9 -c 0.95 -G 0 -g 0 -T 0 -M 0; done' > cd-hit.log &
 ```
-8.	点突变
+# 8.	点突变
 ## pointfinder点突变
-conda activate checkm
+```bash
 vim pointfinder.sh
 for i in *.fasta; do python3 /home/student/pointfinder/PointFinder.py -i \./${i} -o \./pointfinder/ -p \/home/student/pointfinder/pointfinder_db -s salmonella -m blastn -m_p \/home/student/ncbi-blast-2.15.0+/bin/blastn; done
+```
+```bash
 nohup bash -c 'for i in *.fasta; do python3 /data/liushiwei/pointfinder/PointFinder.py -i ${i} -o ./pointfinder -p /data/liushiwei/pointfinder_db -s salmonella -m blastn -m_p /data/liushiwei/ncbi-blast-2.16.0+/bin/blastn; done' >>  pointfinder.log &
-for i in *.fasta; do python3 /data/liushiwei/pointfinder/PointFinder.py -i ${i} -o ./pointfinder -p /data/liushiwei/pointfinder_db -s campylobacter -m blastn -m_p /data/liushiwei/ncbi-blast-2.16.0+/bin/blastn; done
-nohup bash pointfinder.sh >> pointfinder.log &
+```
 ## pointfinder点突变结果汇总
+```bash
 for file in *.tsv; do awk 'NR > 1 {print FILENAME "\t" $0}' "$file" >> pointfinder.tab; done
-## 注意的问题
-pointfinder 无法识别包含有_下划线以及.的文件名，运行之前_.均需要去掉
-9.	GO/KEGG/COG分析
+```
+注意的问题:pointfinder 无法识别包含有_下划线以及.的文件名，运行之前_.均需要去掉
+# 9.	GO/KEGG/COG分析
 ## 使用prodigal进行基因注释和翻译
-conda activate eggnog
+```bash
 nohup bash -c ' for i in *.fasta; do prodigal -i ${i} -a prodigal/${i%.fasta}.faa -o gff/${i%.fasta}.gff -d nucleotide/${i%.fasta}.fa -f gff; done' > prodigal.log &
+```
 ##  eggnog基因注释，需要运行蛋白质文件，运行emapper，18m，默认diamond 1e-3; 2M,32p,1.5h, 该步骤耗时较长
-cd prodigal
+```bash
 mkdir eggnog
 nohup bash -c 'for i in *.faa; do emapper.py --data_dir /home/student/metagenome/eggnog -i ${i} --cpu 8 -m diamond --override -o eggnog/${i%.faa}; done' > eggnog.log &
+```
 ##  格式化结果并显示表头
+```bash
 grep -v '^## ' *.emapper.annotations | sed '1 s/^#//' > output
 csvtk -t headers -v output
-10.	其他常见指令
-## #多序列比对，需要gbk文件,由prokka生成
-conda activate SNP
-clinker clusters/*.gbk
-clinker clusters/*.gbk -p <optional: file name to save static HTML>
+```
+# 10.	其他常见指令
+## 多序列比对，需要gbk文件
+```bash
 clinker files/*.gbk -p plot.html
-clinker -h
-clinker 3-2B.gbk 7-2B.gbk -p -i 0.5 -o alignments.tab
-仅适合较小的较短的序列片段
+```
+```bash
 nohup bash -c 'clinker *gbk -p -i 0.5 -o alignments.tab' > dante.log &
-11.	其他指令补充
+```
+# 11.	其他指令补充
 ##  antiSMASH（antibiotics & Secondary Metabolite Analysis Shell）识别和分析微生物中生物合成基因簇（BGCs）的工具
+```bash
 nohup bash -c 'for i in *.gff; do antismash ${i} --output-dir antismash --asf --pfam2go --smcog-trees --fullhmmer --output-basename ${i%.fasta}; done' > antismash.log &
+```
 ## slurm系列操作指令
 ## 查看当前运行情况，一般不用top来查看
 squeue
@@ -276,16 +282,16 @@ sbatch *.slurm
 ## 其他生信代码补充
 nohup bash -c 'mlst *.fasta > ./pubmlst.tab' &
 ## 压缩，解压指令
-#压缩
+## 压缩
 tar -czvf sichuan_salmon.tar.gz *.fasta
-#解压tar.gz文件
+## 解压tar.gz文件
 for i in *.tar.gz; do tar -zxvf ${i}; done
 tar -zxvf *.tar.gz
 ## 解压gz文件
 gunzip *.gz
 ##  参考资料
 https://www.ncbi.nlm.nih.gov/pathogens/docs/datasets_assemblies/
-12.	Download genomes from NCBI database
+# 12.	Download genomes from NCBI database
 ## 从https://www.ncbi.nlm.nih.gov/pathogens/ 下载accession号以及对应的信息表
 ##  datasets version: 16.43.0
 ## 依据NCBI给的accession号进行下载
@@ -293,119 +299,7 @@ https://www.ncbi.nlm.nih.gov/pathogens/docs/datasets_assemblies/
 nohup bash -c 'datasets download genome accession --inputfile enteritidis_accessions.txt --api-key 1ef429d37c5d6103dac9cdaec0f54728d009' > ncbi.log &
 ## 下载速度虽然慢，但是比较稳定## 
 ## 编写批处理文件，避免出现单条命令出现报错会直接闪退的现象## 
-## 单线程简易版本--------------------------------------------------------------------------------------------
-#!/bin/bash
-input_file="enteritidis_accessions.txt"
-# 检查文件是否存在
-if [ ! -f "$input_file" ]; then
-    echo "错误: 文件 $input_file 未找到！" >&2
-    exit 1
-fi
-# 逐行下载
-while IFS= read -r accession; do
-    echo "正在处理: $accession"
-    datasets download genome accession "$accession" --filename "${accession}.zip" --api-key 1ef429d37c5d6103dac9cdaec0f54728d009 || echo "下载 $accession 失败"
-done < "$input_file"
-echo "全部任务完成。"
-## 
-# 检查必要依赖
-check_dependency() {
-    if ! command -v "$1" >/dev/null 2>&1; then
-        echo "错误: 未找到 $1 命令。请安装: $2" >&2
-        exit 1
-    fi
-}
-check_dependency "datasets" "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/download-and-install/"
-check_dependency "parallel" "apt-get install parallel 或 brew install parallel"
-# 检查输入文件
-if [ ! -f "$INPUT_FILE" ]; then
-    echo "错误: 输入文件 $INPUT_FILE 未找到!" >&2
-    exit 1
-fi
-## 多线程高级版本（最终版本）-----------------------------------------------------------------------------
-#!/bin/bash
-# NCBI基因组下载与校验脚本（支持并行和API密钥）
-# ========== 用户配置 ========== 
-API_KEY="1ef429d37c5d6103dac9cdaec0f54728d009"  # NCBI API密钥
-INPUT_FILE="enteritidis_accessions.txt"              # 输入文件名
-DOWNLOAD_DIR="downloaded_genomes"           # 下载目录
-MAX_PARALLEL=8                              # 最大并行任务数
-LOG_FILE="download.log"                         # 主日志文件
-ERROR_LOG="error.log"                           # 错误日志
-# =============================
-# 创建下载目录
-mkdir -p "$DOWNLOAD_DIR"
-# 初始化日志
-exec > >(tee -a "$LOG_FILE") 2> >(tee -a "$ERROR_LOG" >&2)
-# 文件完整性检查函数
-check_integrity() {
-    local file="$1"
-    if ! unzip -tq "$file" >/dev/null 2>&1; then
-        echo "文件损坏: $(basename $file .zip)" >&2
-        rm -f "$file"
-        return 1
-    fi
-    return 0
-}
-# 收集需要下载的Accession
-echo "[$(date +%T)] 开始文件核对..."
-declare -a missing_accessions
-while IFS= read -r accession; do
-    accession=$(echo "$accession" | tr -d '\r' | xargs)
-    [[ -z "$accession" ]] && continue    
-    target_file="${DOWNLOAD_DIR}/${accession}.zip"    
-    if [ -f "$target_file" ]; then
-        if ! check_integrity "$target_file"; then
-            missing_accessions+=("$accession")
-        fi
-    else
-        missing_accessions+=("$accession")
-    fi
-done < "$INPUT_FILE"
-# 退出条件检查
-if [ ${#missing_accessions[@]} -eq 0 ]; then
-    echo "[$(date +%T)] 所有文件均已完整存在"
-    exit 0
-fi
-# 并行下载函数
-parallel_download() {
-    local acc="$1"
-    echo "[开始下载] $acc"
-# 下载命令（含API密钥）
-    if datasets download genome accession "$acc" \
-        --api-key "$API_KEY" \
-        --filename "${DOWNLOAD_DIR}/${acc}.zip" 2>> "$ERROR_LOG"
-    then
-# 下载后验证
-        if check_integrity "${DOWNLOAD_DIR}/${acc}.zip"; then
-            echo "[下载成功] $acc"
-            return 0
-        fi
-    fi
-    echo "[下载失败] $acc" >&2
-    return 1
-}
-# 导出函数和环境变量供parallel使用
-export -f parallel_download check_integrity
-export API_KEY DOWNLOAD_DIR ERROR_LOG
-# 执行并行下载
-echo "[$(date +%T)] 开始并行下载 ${#missing_accessions[@]} 个文件..."
-printf "%s\n" "${missing_accessions[@]}" | parallel -j $MAX_PARALLEL \
-    --progress --bar --eta \
-    --joblog "${DOWNLOAD_DIR}/parallel.log" \
-    --resume-failed \
-    --tagstring "ACC:{}" \
-    'parallel_download {}'
-# 最终状态报告
-success_count=$(grep -c "下载成功" "$LOG_FILE")
-fail_count=$(grep -c "下载失败" "$ERROR_LOG")
-echo "==============================="
-echo "[最终报告] 下载完成时间: $(date)"
-echo "成功: $success_count 个"
-echo "失败: $fail_count 个"
-echo "日志文件: $LOG_FILE"
-echo "错误日志: $ERROR_LOG"
-echo "并行日志: ${DOWNLOAD_DIR}/parallel.log"
+
 
 ## 下载后的文件立即检查ST型，剔除离群值，做一下质控，并进一步进行去重的工作
 ##  Simply just give it a genome file in FASTA/GenBank/EMBL format, optionally compressed with gzip, zip or bzip2. 无需解压直接运行
@@ -413,9 +307,10 @@ echo "并行日志: ${DOWNLOAD_DIR}/parallel.log"
 unzip *.zip
 for i in *.zip; do unzip ${i}; done
 ## 保留文件的前15个字符（accession ID）
+
 for file in *.fna; do mv "$file" "${file:0:15}.fna"; done
-## for file in *.gz; do mv "$file" "${file:3:50}"; done
-##  # Perl语言版本批量改名
+
+##  Perl语言版本批量改名
 rename 's/\.all.fna/\.fasta/' *
 rename 's/\.fna/\.fasta/' *
 rename 's/GCA/GCA_/' *
