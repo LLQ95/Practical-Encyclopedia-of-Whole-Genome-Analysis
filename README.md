@@ -83,29 +83,29 @@ abricate –list
 ```bash
 abricate-get_db --db megares --force
 ```
-## 使用vim编写批处理文件
+### 使用vim编写批处理文件
 ```bash
 vim prokka.sh  
 ```
 按i进入插入模式
 按esc 输入:wq并回车，保存并退出文本编辑模式
-### 查看文件是否写入
+查看文件是否写入
 ```bash
 cat prokka.sh
 ```
-### 直接运行批处理命令
+直接运行批处理命令
 ```bash
 bash prokka.sh
 ```
-### 程序放服务器的后台运行
+程序放服务器的后台运行
 ```bash
 nohup bash prokka.sh > prokka.log &
 ```
-### 查看正在运行的工作，查看后台有无程序运行
+查看正在运行的工作，查看后台有无程序运行
 ```bash
 jobs
 ```
-### 强制停止任务运行
+强制停止任务运行
 ```bash
 kill -9 %1
 ```
@@ -116,7 +116,7 @@ nohup bash -c 'for i in *.fasta; do rgi main -a DIAMOND --input_sequence ${i} --
 ```bash
 nohup bash -c 'for i in *.fasta; do dante -q ${i} -o gff3/${i%.fasta}.gff3 -c 8; done' > dante.log &
 ```
-使用bakta进行文件注释（运行较慢，注释效果优于prokka和prodigal）
+### 使用bakta进行文件注释（运行较慢，注释效果优于prokka和prodigal）
 ```bash
 nohup bash -c 'for i in *.fasta; do bakta --db /home/student/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
 nohup bash -c 'for i in *.fasta; do bakta --db /home/student/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
@@ -134,17 +134,17 @@ amrfinder -g *.gff
 ```
 # 3.	质粒
 从gff文件里直接截取一段contigs，作为fasta文件，将对应的fasta文件用gbk或者gff文件注释，最后再在easyfig或者是clinker上面进行可视化分析
-## 使用genomad数据库预测可移动元件
+### 使用genomad数据库预测可移动元件
 ```bash
 genomad end-to-end --cleanup --splits 8 GCF_009025895.1.fna.gz genomad_output /data/liushiwei/genomad_db
 nohup bash -c 'for i in *.fasta; do genomad end-to-end --cleanup --splits 8 ${i} genomad_output /data/liushiwei/genomad_db; done' > genomad.log &
 nohup bash -c 'for i in *.fasta; do genomad end-to-end --cleanup --splits 8 ${i} genomad_output /home/student/genomad_db/genomad_db; done' > genomad.log &
 ```
-## MGEfinder
+### MGEfinder
 ```bash
 for i in *.fasta; do mefinder find -t 8 --contig ./${i} ./mefinder/${i%.fasta}; done
 ```
-## 质粒染色体分离
+### 质粒染色体分离
 ```bash
 for i in *.fasta; do PlasFlow.py --input ${i} --output ./plasflow/${i%.fasta} --threshold 0.7; done
 ```
@@ -156,20 +156,20 @@ for i in *.fasta; do mob_recon -i ${i} -o ./mob_suite/${i%.fasta}; done
 nohup bash -c 'roary -e --mafft -p 8 -g 10000000 -r *.gff' > roary.log &
 python3 roary_plots.py core_SNP_tree.tre gene_presence_absence.csv
 ```
-## coinfinder
+### coinfinder
 参考资料：https://zhuanlan.zhihu.com/p/620558098
 ```bash
 coinfinder -i gene_presence_absence.csv -I -p core_SNP_tree.tre -o coinfinder -x 8 -a -d -m
 nohup bash -c 'query_pan_genome -a intersection *.gff' > pan_genome.log &
 scoary -g gene_presence_absence.csv -t traits.csv -n core_SNP_tree_collapsed.nwk
 ```
-## 示例
+### panaroo
 ```bash
 scoary -t Tetracycline_resistance.csv -g Gene_presence_absence.csv -u -c I EPW
 panaroo -i *.gff -o results --clean-mode strict --remove-invalid-genes -t 8
 ```
 panaroo与roary本身并不兼容，需要单独去建立panaroo的环境
-## 泛基因组背景资料介绍
+泛基因组背景资料介绍
 http://sanger-pathogens.github.io/Roary/
 
 # 5.	建树、SNP比较
@@ -207,11 +207,11 @@ chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/listeria
 chewBBACA.py ExtractCgMLST -i ./AlleleCall/results_alleles.tsv -o  ./ExtractCgMLST
 chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g /home/student/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCallEvaluator --cpu 8
 ```
-##  利用已知数据库文件进行cgmlst建库
+利用已知数据库文件进行cgmlst建库
 ```bash
 chewBBACA.py PrepExternalSchema -g /home/student/anaconda3/envs/chewie/db/cronobacter_alleles -o /home/student/anaconda3/envs/chewie/db/crono --cpu 18
 ```
-##  cgmlst
+cgmlst
 ```bash
 chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/crono  -o ../filtration_AlleleCall1 --cpu 8 --mode 1
 chewBBACA.py ExtractCgMLST -i ../filtration_AlleleCall1/results_alleles.tsv -o  ../ExtractCgMLST
