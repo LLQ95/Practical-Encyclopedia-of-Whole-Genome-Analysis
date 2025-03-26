@@ -57,9 +57,9 @@ nohup bash -c 'mlst-download_pub_mlst -j 8 -d /home/student/anaconda3/envs/check
 nohup bash -c 'for i in *.fasta; do prokka --outdir ./prokka/${i%.fasta} --cpus 8 --prefix ${i%.fasta} ${i} --addgenes --addgenes --centre X --compliant;done' > prokka.log &
 ```
 ## abricate 自建数据库
-拿到数据库的fasta文件以后，将其放入对应环境的db下，例如anaconda3/envs/abricate/db/mobileOG/
+拿到数据库的fasta文件以后，将其放入对应环境的db下，例如`anaconda3/envs/abricate/db/mobileOG/`
 对fasta文件执行以下操作
-案例一
+
 ```bash
 awk '/^>/{split($0,a,">"); print "> Tn~~~" a[2] "~~~" a[2] "~~~" a[2]} !/^>/{print}' Tn.fa > modified_Tn.fasta
 ```
