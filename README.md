@@ -184,10 +184,13 @@ snp-dists -j 8 clean.core.aln > snp.tab
 ```
 输出文件core_SNP_tree.tre为核心基因组的树文件,snp.tab 为两两比较的snp文件
 ## 指定建树方法
+```bash
 run_gubbins.py -c 8 --prefix enteritidis --tree-builder iqtree --first-model JC --tree-builder raxmlng --model GTR clean.full.aln
+```
 ## 利用gubbins进行祖先重建
+```bash
 run_gubbins.py -c 8 --best-model --recon-with-dates --date 441_date_1.csv -p enteritidis clean.full.aln
-
+```
 # 6.	血清型鉴定以及cgmlst分型
 ```bash
 nohup bash -c 'for i in *.fasta; do SeqSero2_package.py -m k -t 4 -i ${i} -p 8; done' > seqsero.log &
