@@ -64,7 +64,6 @@ nohup bash -c 'for i in *.fasta; do prokka --outdir ./prokka/${i%.fasta} --cpus 
 ## abricate 自建数据库
 拿到数据库的fasta文件以后，将其放入对应环境的db下，例如`anaconda3/envs/abricate/db/mobileOG/`
 对fasta文件执行以下操作
-
 ```bash
 awk '/^>/{split($0,a,">"); print "> Tn~~~" a[2] "~~~" a[2] "~~~" a[2]} !/^>/{print}' Tn.fa > modified_Tn.fasta
 ```
@@ -110,14 +109,14 @@ jobs
 ```bash
 kill -9 %1
 ```
-## 使用rgi对耐药基因进行注释，使用card数据库
+### 使用rgi对耐药基因进行注释，使用card数据库
 ```bash
 nohup bash -c 'for i in *.fasta; do rgi main -a DIAMOND --input_sequence ${i} --local --clean -o card/${i%.fasta}; done' >> card.log &## 批量生成gff3文件
 ```
 ```bash
 nohup bash -c 'for i in *.fasta; do dante -q ${i} -o gff3/${i%.fasta}.gff3 -c 8; done' > dante.log &
 ```
-## 使用bakta进行文件注释（运行较慢，注释效果优于prokka和prodigal）
+使用bakta进行文件注释（运行较慢，注释效果优于prokka和prodigal）
 ```bash
 nohup bash -c 'for i in *.fasta; do bakta --db /home/student/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
 nohup bash -c 'for i in *.fasta; do bakta --db /home/student/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
@@ -127,7 +126,7 @@ conda install -y -c conda-forge -c bioconda --strict-channel-priority ncbi-amrfi
 ```
 （需要指定版本号，否则无法正常安装）
 bakta 支持宏基因组注释，添加--meta参数
-## 使用amrfinder注释耐药基因
+### 使用amrfinder注释耐药基因
 ```bash
 amrfinder -u -d /home/student/metagenome/bakta/db/amrfinderplus-db
 amrfinder -n *.fasta -o amrfinder.tab --mutation_all --threads 8
