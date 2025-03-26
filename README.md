@@ -48,6 +48,11 @@ https://tncentral.ncc.unesp.br/
 https://phastest.ca/databases
 ## IS database
 https://www-is.biotoul.fr/
+## mobileOG
+https://github.com/clb21565/mobileOG-db/tree/main
+## BacMet
+http://bacmet.biomedicine.gu.se/
+
 ## 更新pubmlst数据库
 ```bash
 nohup bash -c 'mlst-download_pub_mlst -j 8 -d /home/student/anaconda3/envs/checkm/db/pubmlst' > download_pubmlst.log &
