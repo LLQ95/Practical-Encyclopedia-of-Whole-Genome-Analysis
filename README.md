@@ -272,7 +272,6 @@ clinker files/*.gbk -p plot.html
 ```bash
 nohup bash -c 'clinker *gbk -p -i 0.5 -o alignments.tab' > dante.log &
 ```
-# 11.	其他指令补充
 ##  antiSMASH（antibiotics & Secondary Metabolite Analysis Shell）识别和分析微生物中生物合成基因簇（BGCs）的工具
 ```bash
 nohup bash -c 'for i in *.gff; do antismash ${i} --output-dir antismash --asf --pfam2go --smcog-trees --fullhmmer --output-basename ${i%.fasta}; done' > antismash.log &
@@ -310,7 +309,7 @@ gunzip *.gz
 ```
 ##  参考资料
 https://www.ncbi.nlm.nih.gov/pathogens/docs/datasets_assemblies/
-# 12.	Download genomes from NCBI database
+# 11.	Download genomes from NCBI database
 从https://www.ncbi.nlm.nih.gov/pathogens/ 下载accession号以及对应的信息表
 依据NCBI给的accession号进行下载
 he NCBI Datasets command-line tools (CLI) （默认指令，一般弃用，遇到卡顿会退出）
@@ -364,7 +363,7 @@ chmod +x /data/liushiwei/anaconda3/envs/env_roary/bin/roary_plots.py
 ollama run DeepSeek-R1-Distill-Qwen-32B-GGUF:latest
 ollama list
 ``` 
-# 13.	三代分析
+# 12.	三代分析
 Genome assembly 三代nanopore数据分析
 ## Using software spades 
 (http://cab.spbu.ru/software/spades/)
@@ -393,7 +392,7 @@ java -Xmx16G -jar ~/software/pilon-1.23.jar --genome ./contigs.fa --fix all --ch
 sistr -i contigs.fasta contigs.fasta -f csv -o /output/rusults -p CGMLST_PROFILES -n NOVEL_ALLELES
 cat *.csv >> ./totalsero.csv
 ``` 
-# 14.	分子钟
+# 13.	分子钟
 ##  Estimation of time scaled phylogenies (核心语句，用于筛选离群值)
 ```bash
 treetime --tree 441_core_SNP_tree.tre --dates 441_date.csv --aln clean.core.aln --outdir salmonella --coalescent skyline
