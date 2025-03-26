@@ -258,55 +258,55 @@ nohup bash -c ' for i in *.fasta; do prodigal -i ${i} -a prodigal/${i%.fasta}.fa
 mkdir eggnog
 nohup bash -c 'for i in *.faa; do emapper.py --data_dir /home/student/metagenome/eggnog -i ${i} --cpu 8 -m diamond --override -o eggnog/${i%.faa}; done' > eggnog.log &
 ```
-##  格式化结果并显示表头
+格式化结果并显示表头
 ```bash
 grep -v '^## ' *.emapper.annotations | sed '1 s/^#//' > output
 csvtk -t headers -v output
 ```
 # 10.	其他常见指令
-## 多序列比对，需要gbk文件
+多序列比对，需要gbk文件
 ```bash
 clinker files/*.gbk -p plot.html
 ```
 ```bash
 nohup bash -c 'clinker *gbk -p -i 0.5 -o alignments.tab' > dante.log &
 ```
-##  antiSMASH（antibiotics & Secondary Metabolite Analysis Shell）识别和分析微生物中生物合成基因簇（BGCs）的工具
+antiSMASH（antibiotics & Secondary Metabolite Analysis Shell）识别和分析微生物中生物合成基因簇（BGCs）的工具
 ```bash
 nohup bash -c 'for i in *.gff; do antismash ${i} --output-dir antismash --asf --pfam2go --smcog-trees --fullhmmer --output-basename ${i%.fasta}; done' > antismash.log &
 ```
-## slurm系列操作指令
-## 查看当前运行情况，一般不用top来查看
+slurm系列操作指令
+查看当前运行情况，一般不用top来查看
 ```bash
 squeue
 ```
-## 删除当前账户下所有运行的指令
+删除当前账户下所有运行的指令
 ```bash
 scancel -u student
 ```
-## 作业提交指令
+作业提交指令
 ```bash
 sbatch *.slurm
 ```
-## 其他生信代码补充
+其他生信代码补充
 ```bash
 nohup bash -c 'mlst *.fasta > ./pubmlst.tab' &
 ```
-## 压缩，解压指令
-## 压缩
+压缩，解压指令
+压缩
 ```bash
 tar -czvf sichuan_salmon.tar.gz *.fasta
 ```
-## 解压tar.gz文件
+解压tar.gz文件
 ```bash
 for i in *.tar.gz; do tar -zxvf ${i}; done
 tar -zxvf *.tar.gz
 ```
-## 解压gz文件
+解压gz文件
 ```bash
 gunzip *.gz
 ```
-##  参考资料
+参考资料
 https://www.ncbi.nlm.nih.gov/pathogens/docs/datasets_assemblies/
 # 11.	Download genomes from NCBI database
 从https://www.ncbi.nlm.nih.gov/pathogens/ 下载accession号以及对应的信息表
