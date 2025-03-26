@@ -69,7 +69,7 @@ awk '/^>/{split($0,a,">"); print "> mobileOG~~~" a[2] "~~~" a[2] "~~~" a[2]} !/^
 ```
 核心建库语句
 ```bash
-abricate --setupdb --threads 16
+abricate --setupdb --threads 8
 ```
 查看abricate数据库
 ```bash
