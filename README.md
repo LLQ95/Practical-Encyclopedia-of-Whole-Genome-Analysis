@@ -154,7 +154,7 @@ for i in *.fasta; do mob_recon -i ${i} -o ./mob_suite/${i%.fasta}; done
 ```
 # 4.	泛基因组
 ```bash
-nohup bash -c 'roary -e --mafft -p 64 -g 10000000 -r *.gff' > roary.log &
+nohup bash -c 'roary -e --mafft -p 8 -g 10000000 -r *.gff' > roary.log &
 python3 roary_plots.py core_SNP_tree.tre gene_presence_absence.csv
 ```
 ## coinfinder
