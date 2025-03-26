@@ -219,7 +219,7 @@ chewBBACA.py ExtractCgMLST -i ../filtration_AlleleCall1/results_alleles.tsv -o  
 seqkit fx2tab -l -g -n -i -H *.fasta -j 8 > gc.tab
 ```
 # 7.	去重、去冗余
-使用dereplicator去除重复的样本（需要提前安装mash）
+## 使用dereplicator去除重复的样本（需要提前安装mash）
 ```bash
 nohup bash -c 'dereplicator.py ./ dereplicator_0.0001 --distance 0.0001 --thread 32' > dereplicator_0.0001.log &
 ```
