@@ -1,6 +1,6 @@
 # 实用全基因组分析百科全书
 全基因组whole genome sequencing
-将代码中的${your_path}替换成自己系统的路径即可使用
+`将代码中的${your_path}替换成自己系统的路径即可使用`
 ## 1.	组装与评估
 ```bash
 nohup bash -c 'for i in $(ls *.fq.gz | cut -d'_' -f1); do spades.py --isolate -1 ${i}_1.fq.gz -2 ${i}_2.fq.gz -o ./spade/${i} -t 8 -m 300 -k 21,33,55,77; done' > spade.log &
