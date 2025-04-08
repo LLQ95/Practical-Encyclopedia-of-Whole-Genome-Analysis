@@ -1,6 +1,6 @@
 # 实用全基因组分析百科全书
 全基因组whole genome sequencing
-
+将代码中的${your_path}替换成自己系统的路径即可使用
 ## 1.	组装与评估
 ```bash
 nohup bash -c 'for i in $(ls *.fq.gz | cut -d'_' -f1); do spades.py --isolate -1 ${i}_1.fq.gz -2 ${i}_2.fq.gz -o ./spade/${i} -t 8 -m 300 -k 21,33,55,77; done' > spade.log &
@@ -55,7 +55,7 @@ http://bacmet.biomedicine.gu.se/
 
 ## 更新pubmlst数据库
 ```bash
-nohup bash -c 'mlst-download_pub_mlst -j 8 -d /home/student/anaconda3/envs/checkm/db/pubmlst' > download_pubmlst.log &
+nohup bash -c 'mlst-download_pub_mlst -j 8 -d ${your_path}/anaconda3/envs/checkm/db/pubmlst' > download_pubmlst.log &
 ```
 ## 使用prokka进行批量注释 
 ```bash
@@ -118,17 +118,17 @@ nohup bash -c 'for i in *.fasta; do dante -q ${i} -o gff3/${i%.fasta}.gff3 -c 8;
 ```
 ### 使用bakta进行文件注释（运行较慢，注释效果优于prokka和prodigal）
 ```bash
-nohup bash -c 'for i in *.fasta; do bakta --db /home/student/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
-nohup bash -c 'for i in *.fasta; do bakta --db /home/student/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
-nohup bash -c 'for i in *.fasta; do bakta --db /data/liushiwei/bakta_db/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
-amrfinder_update --force_update --database /data/liushiwei/bakta_db/db/amrfinderplus-db
+nohup bash -c 'for i in *.fasta; do bakta --db ${your_path}/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
+nohup bash -c 'for i in *.fasta; do bakta --db ${your_path}/metagenome/bakta/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
+nohup bash -c 'for i in *.fasta; do bakta --db ${your_path}/bakta_db/db -o ./bakta/${i%.fasta} -t 8 -p ${i%.fasta} ${i};done' > bakta.log &
+amrfinder_update --force_update --database ${your_path}/bakta_db/db/amrfinderplus-db
 conda install -y -c conda-forge -c bioconda --strict-channel-priority ncbi-amrfinderplus=4.0.19
 ```
 （需要指定版本号，否则无法正常安装）
 bakta 支持宏基因组注释，添加--meta参数
 ### 使用amrfinder注释耐药基因
 ```bash
-amrfinder -u -d /home/student/metagenome/bakta/db/amrfinderplus-db
+amrfinder -u -d ${your_path}/metagenome/bakta/db/amrfinderplus-db
 amrfinder -n *.fasta -o amrfinder.tab --mutation_all --threads 8
 amrfinder -g *.gff
 ```
@@ -136,9 +136,9 @@ amrfinder -g *.gff
 从gff文件里直接截取一段contigs，作为fasta文件，将对应的fasta文件用gbk或者gff文件注释，最后再在easyfig或者是clinker上面进行可视化分析
 ### 使用genomad数据库预测可移动元件
 ```bash
-genomad end-to-end --cleanup --splits 8 GCF_009025895.1.fna.gz genomad_output /data/liushiwei/genomad_db
-nohup bash -c 'for i in *.fasta; do genomad end-to-end --cleanup --splits 8 ${i} genomad_output /data/liushiwei/genomad_db; done' > genomad.log &
-nohup bash -c 'for i in *.fasta; do genomad end-to-end --cleanup --splits 8 ${i} genomad_output /home/student/genomad_db/genomad_db; done' > genomad.log &
+genomad end-to-end --cleanup --splits 8 GCF_009025895.1.fna.gz genomad_output ${your_path}/genomad_db
+nohup bash -c 'for i in *.fasta; do genomad end-to-end --cleanup --splits 8 ${i} genomad_output ${your_path}/genomad_db; done' > genomad.log &
+nohup bash -c 'for i in *.fasta; do genomad end-to-end --cleanup --splits 8 ${i} genomad_output ${your_path}/genomad_db/genomad_db; done' > genomad.log &
 ```
 ### MGEfinder
 ```bash
@@ -200,23 +200,23 @@ for file in SeqSero_result*/SeqSero_result.tsv; do awk 'NR==2' "$file" >> merged
 ```
 ## cgmlst_salmonella分析，cgMLSTschema99 用于做grapetree ## 
 ```bash
-chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/salmonella/Salmonella_enterica_INNUENDO_cgMLST -o ./AlleleCall --cpu 8 --mode 1
+chewBBACA.py AlleleCall -i ./ -g ${your_path}/anaconda3/envs/chewie/db/salmonella/Salmonella_enterica_INNUENDO_cgMLST -o ./AlleleCall --cpu 8 --mode 1
 chewBBACA.py ExtractCgMLST -i ./AlleleCall/results_alleles.tsv -o  ./ExtractCgMLST
-chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g /home/student/anaconda3/envs/chewie/db/salmonella/Salmonella_enterica_INNUENDO_cgMLST -o ./AlleleCallEvaluator --cpu 8
-chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCall --cpu 8 --mode 1
+chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g ${your_path}/anaconda3/envs/chewie/db/salmonella/Salmonella_enterica_INNUENDO_cgMLST -o ./AlleleCallEvaluator --cpu 8
+chewBBACA.py AlleleCall -i ./ -g ${your_path}/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCall --cpu 8 --mode 1
 chewBBACA.py ExtractCgMLST -i ./AlleleCall/results_alleles.tsv -o  ./ExtractCgMLST
-chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g /home/student/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCallEvaluator --cpu 8
+chewBBACA.py AlleleCallEvaluator -i ./AlleleCall -g ${your_path}/anaconda3/envs/chewie/db/listeria/Listeria_monocytogenes_Pasteur_cgMLST -o ./AlleleCallEvaluator --cpu 8
 ```
 利用已知数据库文件进行cgmlst建库
 ```bash
-chewBBACA.py PrepExternalSchema -g /home/student/anaconda3/envs/chewie/db/cronobacter_alleles -o /home/student/anaconda3/envs/chewie/db/crono --cpu 18
+chewBBACA.py PrepExternalSchema -g ${your_path}/anaconda3/envs/chewie/db/cronobacter_alleles -o /home/student/anaconda3/envs/chewie/db/crono --cpu 18
 ```
 cgmlst
 ```bash
-chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/crono  -o ../filtration_AlleleCall1 --cpu 8 --mode 1
+chewBBACA.py AlleleCall -i ./ -g ${your_path}/anaconda3/envs/chewie/db/crono  -o ../filtration_AlleleCall1 --cpu 8 --mode 1
 chewBBACA.py ExtractCgMLST -i ../filtration_AlleleCall1/results_alleles.tsv -o  ../ExtractCgMLST
-chewBBACA.py AlleleCallEvaluator -i ../filtration_AlleleCall1 -g /home/student/anaconda3/envs/chewie/db/crono  -o ../AlleleCallEvaluator --cpu 8
-chewBBACA.py AlleleCall -i ./ -g /home/student/anaconda3/envs/chewie/db/crono/crono  -o ../filtration_AlleleCall1 --cpu 18 --mode 1
+chewBBACA.py AlleleCallEvaluator -i ../filtration_AlleleCall1 -g ${your_path}/anaconda3/envs/chewie/db/crono  -o ../AlleleCallEvaluator --cpu 8
+chewBBACA.py AlleleCall -i ./ -g ${your_path}/anaconda3/envs/chewie/db/crono/crono  -o ../filtration_AlleleCall1 --cpu 18 --mode 1
 chewBBACA.py ExtractCgMLST -i ../filtration_AlleleCall1/results_alleles.tsv -o  ../ExtractCgMLST
 ```
 ## Linux 隐藏文件/文件夹
@@ -238,10 +238,10 @@ nohup bash -c 'for i in *.fasta; do cd-hit -i ${i} -o cd-hit/${i} -aS 0.9 -c 0.9
 ## pointfinder点突变
 ```bash
 vim pointfinder.sh
-for i in *.fasta; do python3 /home/student/pointfinder/PointFinder.py -i \./${i} -o \./pointfinder/ -p \/home/student/pointfinder/pointfinder_db -s salmonella -m blastn -m_p \/home/student/ncbi-blast-2.15.0+/bin/blastn; done
+for i in *.fasta; do python3 ${your_path}/pointfinder/PointFinder.py -i \./${i} -o \./pointfinder/ -p \${your_path}/pointfinder/pointfinder_db -s salmonella -m blastn -m_p \${your_path}/ncbi-blast-2.15.0+/bin/blastn; done
 ```
 ```bash
-nohup bash -c 'for i in *.fasta; do python3 /data/liushiwei/pointfinder/PointFinder.py -i ${i} -o ./pointfinder -p /data/liushiwei/pointfinder_db -s salmonella -m blastn -m_p /data/liushiwei/ncbi-blast-2.16.0+/bin/blastn; done' >>  pointfinder.log &
+nohup bash -c 'for i in *.fasta; do python3 ${your_path}/pointfinder/PointFinder.py -i ${i} -o ./pointfinder -p ${your_path}/pointfinder_db -s salmonella -m blastn -m_p ${your_path}/ncbi-blast-2.16.0+/bin/blastn; done' >>  pointfinder.log &
 ```
 ## pointfinder点突变结果汇总
 ```bash
@@ -256,7 +256,7 @@ nohup bash -c ' for i in *.fasta; do prodigal -i ${i} -a prodigal/${i%.fasta}.fa
 ##  eggnog基因注释，需要运行蛋白质文件
 ```bash
 mkdir eggnog
-nohup bash -c 'for i in *.faa; do emapper.py --data_dir /home/student/metagenome/eggnog -i ${i} --cpu 8 -m diamond --override -o eggnog/${i%.faa}; done' > eggnog.log &
+nohup bash -c 'for i in *.faa; do emapper.py --data_dir ${your_path}/metagenome/eggnog -i ${i} --cpu 8 -m diamond --override -o eggnog/${i%.faa}; done' > eggnog.log &
 ```
 格式化结果并显示表头
 ```bash
@@ -354,8 +354,8 @@ conda config --show channels
 ``` 
 单独运行某个py的方法，将py程序复制粘贴到对应环境的bin中,再添加权限后即可顺利运行
 ```bash
-chmod +x /data/liushiwei/anaconda3/envs/checkm/bin/dereplicator.py
-chmod +x /data/liushiwei/anaconda3/envs/env_roary/bin/roary_plots.py
+chmod +x ${your_path}/anaconda3/envs/checkm/bin/dereplicator.py
+chmod +x ${your_path}/anaconda3/envs/env_roary/bin/roary_plots.py
 ``` 
 ## 在服务器上使用ollama进行deepseek本地化运行
 ```bash
