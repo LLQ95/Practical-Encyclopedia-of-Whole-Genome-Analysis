@@ -1,7 +1,7 @@
 # 实用全基因组分析百科全书
 全基因组whole genome sequencing (WGS) analysis pipeline
 
-![](https://github.com/LLQ95/Practical-Encyclopedia-of-Whole-Genome-Analysis/blob/main/flowchartforWGS.jpg)
+![WGS analysis pipeline](https://github.com/LLQ95/Practical-Encyclopedia-of-Whole-Genome-Analysis/blob/main/flowchartforWGS.jpg)
 
 ### 代码说明
 将代码中的`${your_path}`替换成自己系统的路径即可使用，代码默认为8核，实际操作的时候可以根据服务器的情况进行微调
